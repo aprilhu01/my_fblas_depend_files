@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
         }
 
     //create data
-    float *x,*y,*A;
+    float *A,*B,*C;
     float *res,*cpu_res;
 
     posix_memalign ((void **)&A, IntelFPGAOCLUtils::AOCL_ALIGNMENT, k*m*sizeof(float));
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 
     //create buffer over fpga
     cout<<"creating buffer..."<<endl;
-    cl::Buffer fpga_A(context, CL_MEM_READ_ONLY|CL_CHANNEL_1_INTELFPGA, m*k*sizeof(float))
+    cl::Buffer fpga_A(context, CL_MEM_READ_ONLY|CL_CHANNEL_1_INTELFPGA, m*k*sizeof(float));
     cl::Buffer fpga_B(context, CL_MEM_READ_ONLY|CL_CHANNEL_2_INTELFPGA, k*n*sizeof(float));
     cl::Buffer fpga_C(context, CL_MEM_READ_WRITE|CL_CHANNEL_3_INTELFPGA, m*n*sizeof(float));
 
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
 	    const float o = res[i];
         const float r = cpu_res[i];
         const float d = o - r;
-        diff += d * d;
+        dif += d * d;
         ref += r * r;
     }
     error=sqrtf(dif)/sqrtf(ref);
