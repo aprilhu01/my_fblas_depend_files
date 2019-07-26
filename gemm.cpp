@@ -30,7 +30,7 @@ void generate_matrix(T *A,int column,int row)
     {
 	//fill column[i+1]
         for(int j=0;j<row;j++)
-            A[i*row+j] = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/MAX_NUMB));
+            A[i*row+j] = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/10.0));
     }
 }
 
@@ -116,9 +116,9 @@ int main(int argc, char *argv[])
 #if defined(BLOCKING)
     //alpha*A * B + beta*y
     cout<<"Running..."<<endl;
-    fb.sgemm(context, FBLAS_NO_TRANSPOSED, FBLAS_NO_TRANSPOSED, n,  m, k, alpha, fpga_A, m, fpga_B, k, beta, C, m)
+    fb.sgemm(context, FBLAS_NO_TRANSPOSED, FBLAS_NO_TRANSPOSED, n,  m, k, alpha, fpga_A, m, fpga_B, k, beta, fpga_C, m);
     //copy back the result
-    queue.enqueueReadBuffer(fpga_res,CL_TRUE,0,m*sizeof(float),res);
+    queue.enqueueReadBuffer(fpga_C,CL_TRUE,0,m*sizeof(float),res);
 #else
     std::vector<cl::Event> gemm_event;
     cl::Event e;
