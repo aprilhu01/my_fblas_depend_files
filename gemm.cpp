@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 
     int c; 
     //m -> rows of A  n -> column of B  k -> COL(A)=ROW(B)
-    int n,m,k;  
+    unsigned int n,m,k;  
     double alpha,beta;
     std::string program_path, json_path;
     while ((c = getopt (argc, argv, "n:m:k:j:b:a:B:")) != -1)
