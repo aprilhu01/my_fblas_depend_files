@@ -112,9 +112,10 @@ int main(int argc, char *argv[])
             ref+=y[i]*y[i];
     }
     const float error = sqrtf(dif)/sqrtf(ref);
+    cout << "Error= " <<error<<endl;
     if(error>=1e-6)
-        cout << "Error: " <<error<<" >= requirment " <<endl;
+        cout << "Fail"<<endl;  
     else
-        cout << "Okay"<<endl;
+        cout << "Pass"<<endl;
 
 }
