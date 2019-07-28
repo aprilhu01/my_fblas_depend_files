@@ -116,13 +116,13 @@ int main(int argc, char *argv[])
 #if defined(BLOCKING)
     //alpha*A * B + beta*y
     cout<<"Running..."<<endl;
-    fb.sgemm(context, FBLAS_NO_TRANSPOSED, FBLAS_NO_TRANSPOSED, n,  m, k, alpha, fpga_A, m, fpga_B, k, beta, fpga_C, m);
+    fb.sgemm("sgemm", FBLAS_NO_TRANSPOSED, FBLAS_NO_TRANSPOSED, n,  m, k, alpha, fpga_A, m, fpga_B, k, beta, fpga_C, m);
     //copy back the result
     queue.enqueueReadBuffer(fpga_C,CL_TRUE,0,m*sizeof(float),res);
 #else
     std::vector<cl::Event> gemm_event;
     cl::Event e;
-    fb.sgemm(context, FBLAS_NO_TRANSPOSED, FBLAS_NO_TRANSPOSED, n,  m, k, alpha, fpga_A, m, fpga_B, k, beta, fpga_C, m, nullptr, &e)
+    fb.sgemm("sgemm", FBLAS_NO_TRANSPOSED, FBLAS_NO_TRANSPOSED, n,  m, k, alpha, fpga_A, m, fpga_B, k, beta, fpga_C, m, nullptr, &e)
     gemm_event.push_back(e);
 
     queue.enqueueReadBuffer(fpga_C,CL_TRUE,0,m*sizeof(float),res,&gemm_event);
@@ -150,9 +150,9 @@ int main(int argc, char *argv[])
     }
 
     
-	for(unsigned i = 0; i <m;i++)
-	{
-	    const float o = res[i];
+    for(unsigned i = 0; i <m;i++)
+    {
+	const float o = res[i];
         const float r = cpu_res[i];
         const float d = o - r;
         dif += d * d;
