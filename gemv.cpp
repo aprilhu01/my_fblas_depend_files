@@ -32,7 +32,7 @@ void generate_matrix(T *A,int N,int M)
     {
 	//fill column[i+1]
         for(int j=0;j<M;j++)
-            A[i*M+j] = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/MAX_NUMB));
+            A[i*M+j] = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/10.0));
     }
 }
 
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
 
     //create buffer over fpga
     cout<<"creating buffer..."<<endl;
-    cl::Buffer fpga_A(context, CL_MEM_READ_ONLY|CL_CHANNEL_1_INTELFPGA, n * m*sizeof(float))
+    cl::Buffer fpga_A(context, CL_MEM_READ_ONLY|CL_CHANNEL_1_INTELFPGA, n * m*sizeof(float));
     cl::Buffer fpga_x(context, CL_MEM_READ_ONLY|CL_CHANNEL_2_INTELFPGA, m *sizeof(float));
     cl::Buffer fpga_y(context, CL_MEM_READ_WRITE|CL_CHANNEL_3_INTELFPGA, n * sizeof(float));
 
@@ -140,18 +140,19 @@ int main(int argc, char *argv[])
     float error = 0.0f;
     for(unsigned i = 0; i < m; i++)
     {
-	    float sum = 0.0f;
-	    for(unsigned j = 0; j < n; j++){
-		sum += A[n * i + j]* x[j];
-		}
+        float sum = 0.0f;
+	    for(unsigned j = 0; j < n; j++)
+	    {
+            sum += A[n * i + j]* x[j];
+        }
 	    cpu_res[i] = sum;
-	}
-	for(unsigned i = 0; i <m;i++)
-	{
+    }
+    for(unsigned i = 0; i <m;i++)
+    {
 	    const float o = res[i];
         const float r = cpu_res[i];
         const float d = o - r;
-        diff += d * d;
+        dif += d * d;
         ref += r * r;
     }
     error=sqrtf(dif)/sqrtf(ref);
