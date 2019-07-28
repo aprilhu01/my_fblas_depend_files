@@ -49,7 +49,8 @@ int main(int argc, char *argv[])
     int c;
     //n is width of matix and m is height
     int n,m;
-    double alpha;
+    double alpha,beta;
+    beta=0;
     std::string program_path, json_path;
     while ((c = getopt (argc, argv, "n:m:j:b:a:")) != -1)
         switch (c)
@@ -114,16 +115,16 @@ int main(int argc, char *argv[])
 #if defined(BLOCKING)
     //A * x + 0*y
     cout<<"Running..."<<endl;
-    fb.gemv("sgemv", FBLAS_NO_TRANSPOSED, n, m, alpha, fpga_A, m, fpga_x, 1, 0, fpga_y, 1);
+    fb.gemv("sgemv", FBLAS_NO_TRANSPOSED, n, m, alpha, fpga_A, m, fpga_x, 1, beta, fpga_y, 1);
     queue.enqueueReadBuffer(fpga_res,CL_TRUE,0,m*sizeof(float),res);
     const double end_time = aocl_utils::getCurrentTimestamp();
 #else
     std::vector<cl::Event> gemv_event;
     cl::Event e;
-    fb.gemv("sgemv", FBLAS_NO_TRANSPOSED, n, m, alpha, fpga_A, n*m, fpga_x, 1, 0, fpga_y, 1, &e,nullptr);
+    fb.gemv("sgemv", FBLAS_NO_TRANSPOSED, n, m, alpha, fpga_A, n*m, fpga_x, 1, beta, fpga_y, 1, &e,nullptr);
     gemv_event.push_back(e);
 
-    queue.enqueueReadBuffer(fpga_res,CL_TRUE,0,m*sizeof(float),res,&gemv_event);
+    queue.enqueueReadBuffer(fpga_y,CL_TRUE,0,m*sizeof(float),res,&gemv_event);
     const double end_time = aocl_utils::getCurrentTimestamp();
 
 #endif
