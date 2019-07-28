@@ -4,6 +4,10 @@
 #include <iostream>
 #include <string>
 #include <fblas_environment.hpp>
+#include "AOCLUtils/opencl.h"
+#include "AOCLUtils/aocl_utils.h"
+#include "CL/opencl.h"
+
 
 using namespace std;
 #define BLOCKING //comment this for unblocking routine calls
