@@ -25,7 +25,7 @@ void generate_vector (float *x, int n)
 template <typename T>
 void generate_matrix(T *A,int column,int row)
 {
-    //A(i,j)=A[m*i+j]
+    //A[col(i+1),row(j+1)]=A[m*i+j]
     for(int i=0;i<column;i++)
     {
 	//fill column[i+1]
@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     //command line argument parsing
     if(argc<15)
     {
-        cerr << "Usage: "<< argv[0]<<" -b <binary file> -j <json file> -n <column of matix B> -m <row of the matix A> -k <column of the matix A> -x<beta> -a <alpha>"<<endl;
+        cerr << "Usage: "<< argv[0]<<" -b <binary file> -j <json file> -n <column of matix B> -m <row of the matix A> -k <column of the matix A> -B<beta> -a <alpha>"<<endl;
         exit(-1);
     }
 
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     unsigned int n,m,k;  
     double alpha,beta;
     std::string program_path, json_path;
-    while ((c = getopt (argc, argv, "n:m:k:j:b:a:x:")) != -1)
+    while ((c = getopt (argc, argv, "n:m:k:j:b:a:B:")) != -1)
         switch (c)
         {
             case 'm':
@@ -66,10 +66,7 @@ int main(int argc, char *argv[])
                 break;
             case 'a':
                 alpha=atof(optarg);
-                break;
-            case 'x':
-                beta=atof(optarg);
-                break;            
+                break;    
 	    case 'b':
                 program_path=std::string(optarg);
                 break;
@@ -77,10 +74,11 @@ int main(int argc, char *argv[])
                 json_path=std::string(optarg);
                 break;
             default:
-                cerr << "Usage: "<< argv[0]<<" -b <binary file> -j <json file> -n <column of matix B> -m <row of the matix A> -k <column of the matix A> -x<beta> -a <alpha>"<<endl;
+                cerr << "Usage: "<< argv[0]<<" -b <binary file> -j <json file> -n <column of matix B> -m <row of the matix A> -k <column of the matix A> -B<beta> -a <alpha>"<<endl;
                 exit(-1);
         }
-
+    cout<<"m= "<<m<<"    n= "<<n<<"    k= "<<k<<"    alpha= "<<alpha<<"   beta= "<<beta<<endl;
+    
     //create data
     float *A,*B,*C;
     float *res,*cpu_res;
@@ -144,12 +142,12 @@ int main(int argc, char *argv[])
     float error = 0.0f;
 
     //specila attention here!
-    for (int x = 0; x < k; x++) {
+    for (int l = 0; l < k; l++) {
         for (int i = 0; i < n; i++) {
             float temp = alpha * A[m * i + k];
             if (temp != 0.0) {
                 for (int j = 0; j < m; j++) {
-                    cpu_res[m * i + j] += temp * B[k * x + j];
+                    cpu_res[m * i + j] += temp * B[l * k + j];
                 }
             }
         }
