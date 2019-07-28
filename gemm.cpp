@@ -95,7 +95,9 @@ int main(int argc, char *argv[])
     generate_matrix<float>(A,k,m); //A has m rows and k columnS
     generate_matrix<float>(B,n,k); //B has k rows and n columns
     generate_matrix<float>(C,n,m); //C has m rows and n columns
-
+    
+    cout<<"A[0]= "<<A[0]<<"	B[0]= "<<B[0]<<"	C[0]= "<<C[0]<<endl;
+	
     //create FBLAS environment
     FBLASEnvironment fb(program_path,json_path);
 
@@ -116,22 +118,23 @@ int main(int argc, char *argv[])
     queue.enqueueWriteBuffer(fpga_A,CL_TRUE,0,m*k*sizeof(float),A);
     queue.enqueueWriteBuffer(fpga_B,CL_TRUE,0,k*n*sizeof(float),B);
     queue.enqueueWriteBuffer(fpga_C,CL_TRUE,0,m*n*sizeof(float),C);
+	
 #if defined(BLOCKING)
-    //alpha*A * B + beta*y
+    //alpha*A * B + beta*C
     cout<<"Running..."<<endl;
     fb.sgemm("sgemm", FBLAS_NO_TRANSPOSED, FBLAS_NO_TRANSPOSED, n,  m, k, alpha, fpga_A, m, fpga_B, k, beta, fpga_C, m);
     //copy back the result
-    queue.enqueueReadBuffer(fpga_C,CL_TRUE,0,m*sizeof(float),res);
+    queue.enqueueReadBuffer(fpga_C,CL_TRUE,0,m*n*sizeof(float),res);
 #else
     std::vector<cl::Event> gemm_event;
     cl::Event e;
     fb.sgemm("sgemm", FBLAS_NO_TRANSPOSED, FBLAS_NO_TRANSPOSED, n,  m, k, alpha, fpga_A, m, fpga_B, k, beta, fpga_C, m, nullptr, &e)
     gemm_event.push_back(e);
 
-    queue.enqueueReadBuffer(fpga_C,CL_TRUE,0,m*sizeof(float),res,&gemm_event);
+    queue.enqueueReadBuffer(fpga_C,CL_TRUE,0,m*n*sizeof(float),res,&gemm_event);
 
 #endif
-
+    cout<<"A[0]= "<<A[0]<<"	B[0]= "<<B[0]<<"	C[0]= "<<C[0]<<endl;
 
 
     //check
@@ -153,13 +156,17 @@ int main(int argc, char *argv[])
     }
 
     
-    for(unsigned i = 0; i <m;i++)
+    for(unsigned i = 0; i <n;i++)
     {
-	const float o = res[i];
-        const float r = cpu_res[i];
-        const float d = o - r;
-        dif += d * d;
-        ref += r * r;
+        for(unsigned j = 0; j<m; m++)
+        {
+            const float o = res[i*m+j];
+            const float r = cpu_res[i*m+j];
+            const float d = o - r;
+            dif += d * d;
+            ref += r * r;
+        }
+	   
     }
     error=sqrtf(dif)/sqrtf(ref);
     cout<<"the error is"<<error<<endl;
