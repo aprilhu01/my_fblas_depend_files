@@ -152,7 +152,12 @@ int main(int argc, char *argv[])
             }
         }
     }
-
+    cout<<"cpu_res[0] = "<<cpu_res[0]<<endl;
+    cout<<"res[0] = "<<res[0]<<endl;
+    cout<<"cpu_res[m] = "<<cpu_res[m]<<endl;
+    cout<<"res[m] = "<<res[m]<<endl;
+    cout<<"cpu_res[n] = "<<cpu_res[n]<<endl;
+    cout<<"res[n] = "<<res[n]<<endl;
     
     for(unsigned i = 0; i <n;i++)
     {
