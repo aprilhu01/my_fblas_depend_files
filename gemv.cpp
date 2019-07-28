@@ -10,6 +10,9 @@
 #include <iostream>
 #include <string>
 #include <fblas_environment.hpp>
+#include "AOCLUtils/opencl.h"
+#include "AOCLUtils/aocl_utils.h"
+#include "CL/opencl.h"
 
 using namespace std;
 #define BLOCKING //comment this for unblocking routine calls
@@ -106,11 +109,14 @@ int main(int argc, char *argv[])
     queue.enqueueWriteBuffer(fpga_x,CL_TRUE,0,m*sizeof(float),x);
     queue.enqueueWriteBuffer(fpga_y,CL_TRUE,0,m*sizeof(float),y);
     queue.enqueueWriteBuffer(fpga_A,CL_TRUE,0,n*m*sizeof(float),A);
+
+    const double start_time = aocl_utils::getCurrentTimestamp();
 #if defined(BLOCKING)
     //A * x + 0*y
     cout<<"Running..."<<endl;
     fb.gemv("sgemv", FBLAS_NO_TRANSPOSED, n, m, alpha, fpga_A, m, fpga_x, 1, 0, fpga_y, 1);
     queue.enqueueReadBuffer(fpga_res,CL_TRUE,0,m*sizeof(float),res);
+    const double end_time = aocl_utils::getCurrentTimestamp();
 #else
     std::vector<cl::Event> gemv_event;
     cl::Event e;
@@ -118,9 +124,12 @@ int main(int argc, char *argv[])
     gemv_event.push_back(e);
 
     queue.enqueueReadBuffer(fpga_res,CL_TRUE,0,m*sizeof(float),res,&gemv_event);
+    const double end_time = aocl_utils::getCurrentTimestamp();
 
 #endif
 
+    const double total_time = end_time - start_time;
+    printf("\nTime: %0.3f ms\n", total_time * 1e3);
 
     //copy back the result
 
