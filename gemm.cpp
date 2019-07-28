@@ -67,7 +67,10 @@ int main(int argc, char *argv[])
             case 'a':
                 alpha=atof(optarg);
                 break;
-            case 'b':
+            case 'B':
+                beta=atof(optarg);
+                break;            
+	    case 'b':
                 program_path=std::string(optarg);
                 break;
             case 'j':
