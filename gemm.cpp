@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
     //specila attention here!
     for (int l = 0; l < k; l++) {
         for (int i = 0; i < n; i++) {
-            float temp = alpha * A[m * i + k];
+            float temp = alpha * A[m * i + l];
             if (temp != 0.0) {
                 for (int j = 0; j < m; j++) {
                     cpu_res[m * i + j] += temp * B[l * k + j];
