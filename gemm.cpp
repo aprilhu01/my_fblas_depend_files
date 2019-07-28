@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     //command line argument parsing
     if(argc<15)
     {
-        cerr << "Usage: "<< argv[0]<<" -b <binary file> -j <json file> -n <column of matix B> -m <row of the matix A> -k <column of the matix A> -B<beta> -a <alpha>"<<endl;
+        cerr << "Usage: "<< argv[0]<<" -b <binary file> -j <json file> -n <column of matix B> -m <row of the matix A> -k <column of the matix A> -x<beta> -a <alpha>"<<endl;
         exit(-1);
     }
 
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
                 json_path=std::string(optarg);
                 break;
             default:
-                cerr << "Usage: "<< argv[0]<<" -b <binary file> -j <json file> -n <column of matix B> -m <row of the matix A> -k <column of the matix A> -B<beta> -a <alpha>"<<endl;
+                cerr << "Usage: "<< argv[0]<<" -b <binary file> -j <json file> -n <column of matix B> -m <row of the matix A> -k <column of the matix A> -x<beta> -a <alpha>"<<endl;
                 exit(-1);
         }
 
