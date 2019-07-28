@@ -72,22 +72,28 @@ int main(int argc, char *argv[])
     //copy data
     queue.enqueueWriteBuffer(fpga_x,CL_TRUE,0,n*sizeof(float),x);
     queue.enqueueWriteBuffer(fpga_y,CL_TRUE,0,n*sizeof(float),y);
+    
+    const double start_time = aocl_utils::getCurrentTimestamp();
+    
 #if defined(BLOCKING)
     //copy x to y
-    fb.scopy("scopy_0",n,fpga_x,1,fpga_y,1);
-
+    fb.scopy("scopy",n,fpga_x,1,fpga_y,1);
+    
     queue.enqueueReadBuffer(fpga_y,CL_TRUE,0,n*sizeof(float),y);
-
+    const double end_time = aocl_utils::getCurrentTimestamp();
 #else
     std::vector<cl::Event> copy_event;// copy_event_3;
     cl::Event e;
-    fb.scopy("scopy_0",n,fpga_x,1,fpga_y,1,nullptr,&e);
+    fb.scopy("scopy",n,fpga_x,1,fpga_y,1,nullptr,&e);
     copy_event.push_back(e);
 
     queue.enqueueReadBuffer(fpga_y,CL_TRUE,0,n*sizeof(float),y,&copy_event);
-
+    const double end_time = aocl_utils::getCurrentTimestamp();
 #endif
 
+    //calculate time
+    const double total_time = end_time - start_time;
+    printf("\nTime: %0.3f ms\n", total_time * 1e3);
 
     //copy back the result
 
