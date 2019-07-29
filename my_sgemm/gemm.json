@@ -1,0 +1,19 @@
+{
+    "routine": [
+		{
+			"blas" : "gemm",
+			"user_name" : "sgemm",
+			"precision" : "single",
+			"width" : 16,
+			"incx" : 1,
+			"incy" : 1,
+			"transa" : "N",
+			"transb" : "N",
+			"order" : "RowMajor",
+			"tile size": 16,
+			"computational width x" : 8,
+			"computational width y" : 8
+		}
+    ],
+    "platform" : "stratix 10"
+}

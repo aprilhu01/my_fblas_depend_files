@@ -1,0 +1,13 @@
+{
+    "routine": [
+		{
+			"blas" : "copy",
+			"user_name" : "scopy",
+			"precision" : "single",
+			"width" : 16,
+			"incx" : 1,
+			"incy" : 1
+		}
+    ],
+    "platform" : "stratix 10"
+}

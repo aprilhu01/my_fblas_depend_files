@@ -1,0 +1,13 @@
+{
+    "routine": [
+		{
+			"blas" : "axpy",
+			"user_name" : "saxpy",
+			"precision" : "single",
+			"width" : 16,
+			"incx" : 1,
+			"incy" : 1
+		}
+    ],
+    "platform" : "stratix 10"
+}

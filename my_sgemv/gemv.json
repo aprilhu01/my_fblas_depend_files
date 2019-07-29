@@ -1,0 +1,17 @@
+{
+    "routine": [
+		{
+			"blas" : "gemv",
+			"user_name" : "sgemv",
+			"precision" : "single",
+			"width" : 16,
+			"incx" : 1,
+			"incy" : 1,
+			"trans" : "N",
+			"order" : "RowMajor",
+			"tile N size": 16,
+			"tile M size": 32
+		}
+    ],
+    "platform" : "stratix 10"
+}
