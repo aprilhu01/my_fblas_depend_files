@@ -44,9 +44,9 @@ int main(int argc, char *argv[])
         exit(-1);
     }
 
-    int c; 
+    int c;
     //m -> rows of A  n -> column of B  k -> COL(A)=ROW(B)
-    unsigned int n,m,k;  
+    unsigned int n,m,k;
     double alpha,beta;
     std::string program_path, json_path;
     while ((c = getopt (argc, argv, "n:m:k:j:b:a:B:")) != -1)
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
         {
             case 'm':
                 m=atoi(optarg);
-                break;            
+                break;
             case 'n':
                 n=atoi(optarg);
                 break;
@@ -66,8 +66,8 @@ int main(int argc, char *argv[])
                 break;
             case 'a':
                 alpha=atof(optarg);
-                break;    
-	    case 'b':
+                break;
+            case 'b':
                 program_path=std::string(optarg);
                 break;
             case 'j':
@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
                 exit(-1);
         }
     cout<<"m= "<<m<<"    n= "<<n<<"    k= "<<k<<"    alpha= "<<alpha<<"   beta= "<<beta<<endl;
-    
+
     //create data
     float *A,*B,*C;
     float *res,*cpu_res;
@@ -93,13 +93,23 @@ int main(int argc, char *argv[])
     generate_matrix<float>(A,k,m); //A has m rows and k columnS
     generate_matrix<float>(B,n,k); //B has k rows and n columns
     generate_matrix<float>(C,n,m); //C has m rows and n columns
-    
-    cout<<"A[0]= "<<A[0]<<"	B[0]= "<<B[0]<<"	C[0]= "<<C[0]<<endl;
-	
+
+    /*for(int i=0;i<k;i++)
+    {
+        for(int j=0;j<m;j++)
+        {
+            cout<<"A["<<i<<"*"<<m<<"+"<<j<<"] = "<<A[i*m+j]<<endl;
+        }
+        for(int j=0;j<n;j++)
+        {
+            cout<<"B["<<j<<"*"<<k<<"+"<<i<<"] = "<<B[j*k+i]<<endl;
+        }
+    }*/
+
     //create FBLAS environment
     FBLASEnvironment fb(program_path,json_path);
-
-    //get context and device
+                                                    
+     //get context and device
     cl::Context context=fb.get_context();
     cl::Device device=fb.get_device();
     cl::CommandQueue queue;
@@ -116,13 +126,15 @@ int main(int argc, char *argv[])
     queue.enqueueWriteBuffer(fpga_A,CL_TRUE,0,m*k*sizeof(float),A);
     queue.enqueueWriteBuffer(fpga_B,CL_TRUE,0,k*n*sizeof(float),B);
     queue.enqueueWriteBuffer(fpga_C,CL_TRUE,0,m*n*sizeof(float),C);
-	
+
+    const double start_time = aocl_utils::getCurrentTimestamp();
 #if defined(BLOCKING)
     //alpha*A * B + beta*C
     cout<<"Running..."<<endl;
     fb.sgemm("sgemm", FBLAS_NO_TRANSPOSED, FBLAS_NO_TRANSPOSED, n,  m, k, alpha, fpga_A, m, fpga_B, k, beta, fpga_C, m);
     //copy back the result
     queue.enqueueReadBuffer(fpga_C,CL_TRUE,0,m*n*sizeof(float),res);
+    const double end_time = aocl_utils::getCurrentTimestamp();
 #else
     std::vector<cl::Event> gemm_event;
     cl::Event e;
@@ -130,10 +142,12 @@ int main(int argc, char *argv[])
     gemm_event.push_back(e);
 
     queue.enqueueReadBuffer(fpga_C,CL_TRUE,0,m*n*sizeof(float),res,&gemm_event);
+    const double end_time = aocl_utils::getCurrentTimestamp();
 
 #endif
-    cout<<"A[0]= "<<A[0]<<"	B[0]= "<<B[0]<<"	C[0]= "<<C[0]<<endl;
 
+    const double total_time = end_time - start_time;
+    printf("\nTime: %0.3f ms\n", total_time * 1e3);
 
     //check
     cout<<"verifying..."<<endl;
@@ -141,38 +155,41 @@ int main(int argc, char *argv[])
     float ref = 0.0f;
     float error = 0.0f;
 
-    //specila attention here!
+    //soecial attention here!
     for (int l = 0; l < k; l++) {
-        for (int i = 0; i < n; i++) {
-            float temp = alpha * A[m * i + l];
+        for (int i = 0; i < m; i++) {
+            float temp = alpha * A[m * l + i];
+
             if (temp != 0.0) {
-                for (int j = 0; j < m; j++) {
-                    cpu_res[m * i + j] += temp * B[l * k + j];
+                for (int j = 0; j < n; j++) {
+                    cpu_res[m * j + i] += temp * B[j* k + l];
+                    //cout<<"B["<<j<<"*"<<k<<"+"<<l<<"]       = "<<B[j*k+l]<<endl;
+                    //cout<<"temp= "<<temp<<endl;
                 }
+                //cout<<endl;
             }
         }
     }
-    cout<<"cpu_res[0] = "<<cpu_res[0]<<endl;
-    cout<<"res[0] = "<<res[0]<<endl;
-    cout<<"cpu_res[m] = "<<cpu_res[m]<<endl;
-    cout<<"res[m] = "<<res[m]<<endl;
-    cout<<"cpu_res[n] = "<<cpu_res[n]<<endl;
-    cout<<"res[n] = "<<res[n]<<endl;
+
+
     
-    for(unsigned i = 0; i <n;i++)
+   for(unsigned i = 0; i <n;i++)
     {
-        for(unsigned j = 0; j<m; m++)
+        for(unsigned j = 0; j<m;j++)
         {
             const float o = res[i*m+j];
             const float r = cpu_res[i*m+j];
             const float d = o - r;
             dif += d * d;
             ref += r * r;
+            //cout<<"res["<<i<<"*"<<m<<"+"<<j<<"]     = "<<res[i*m+j]<<endl;
+            //cout<<"cpu_res["<<i<<"*"<<m<<"+"<<j<<"] = "<<cpu_res[i*m+j]<<endl;
         }
-	   
+
     }
     error=sqrtf(dif)/sqrtf(ref);
     cout<<"the error is"<<error<<endl;
+
 
 
     
