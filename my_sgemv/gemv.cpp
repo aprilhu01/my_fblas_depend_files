@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
         float sum = 0.0f;
 	    for(unsigned j = 0; j < n; j++)
 	    {
-            sum += A[n * i + j]* x[j];
+            sum += A[m * j + i]* x[j];
         }
 	    cpu_res[i] = sum;
     }
